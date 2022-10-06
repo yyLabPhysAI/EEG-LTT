@@ -1,4 +1,4 @@
-# Time-Series LTT
+# Time-Series Learn Then Test
 
 A time-series implementation of the [Learn Then Test] (LTT) risk-controlling prediction framework. <br>
 
