@@ -57,7 +57,7 @@ def synthetic_data(
     return gt, y_pred
 
 
-def test_ltt(alpha, num_samples, pooling, corrector):
+def test_ltt(alpha: float, num_samples: int, pooling: bool, corrector: str):
     """
     Preforms a single LTT synthetic data experiment.
 
@@ -154,7 +154,7 @@ def main():
         type=str,
         default="bon",
         help="Multiple Hypothesis Corrector to use, avalable are: bon "
-             "(Bonferroni correction) and fsc (fixed sequence correction)",
+        "(Bonferroni correction) and fsc (fixed sequence correction)",
     )
     parser.add_argument(
         "-p",
@@ -171,21 +171,21 @@ def main():
 
     args = parser.parse_args()
 
-    alpha_list = [1, 0.1, 0.05, 0.001, 0.0005]
+    alpha_list = [1, 0.1, 0.05, 0.01, 0.005, 0.001]
 
     res = []
     n_jobs = None if args.no_parallel else -1
-    pool = Parallel(n_jobs=n_jobs, verbose=100)
-    for a in alpha_list:
-        print(f"Calculating for alpha={a}, reps={args.reps}")
-        res.append(
-            pool(
-                delayed(test_ltt)(
-                    a, args.num_samples, not args.no_pooling, args.corrector
+    with Parallel(n_jobs=n_jobs, verbose=100) as pool:
+        for a in alpha_list:
+            print(f"Calculating for alpha={a}, reps={args.reps}")
+            res.append(
+                pool(
+                    delayed(test_ltt)(
+                        a, args.num_samples, not args.no_pooling, args.corrector
+                    )
+                    for _ in range(args.reps)
                 )
-                for _ in range(args.reps)
             )
-        )
 
     df = pd.DataFrame(
         columns=["False Alarm Rate", "Accuracy", "Lambda", "Alpha"],
